@@ -118,7 +118,6 @@ void printStates(int** matrix, int totalStates, int M, int N){
 		printf("Siguiente estado:\n");
 		printMatrix(*matrix,M,N);
 	}
-	//return *matrix;
 	
 }
 
