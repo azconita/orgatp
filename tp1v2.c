@@ -7,14 +7,13 @@ Queda por hacer:
 	funcion en assembler
 
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-
+extern int vecinos(int* matrix, int row, int column, int rows, int columns);
 
 void eliminateMatrix(int* matrix) { 
 	free(matrix);
