@@ -9,9 +9,13 @@ Queda por hacer:
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+const char *programVersion = "2.1";
+char *programName;
 
 extern int vecinos(int* matrix, int row, int column, int rows, int columns);
 
@@ -120,24 +124,63 @@ void printStates(int** matrix, int totalStates, int M, int N){
 	
 }
 
+void printHelpMenu(){
+	printf("\n\n\t\t-h, --help Imprime este mensaje.\n"
+"\t\t-V, --version Da la versi´on del programa.\n"
+"\t\t-o Prefijo de los archivos de salida.\n\n");
+}
+
+void printProgramVersion(){
+	printf("\n%s Version %s\n", programName, programVersion);
+}
+
 int main(int argc, char const *argv[])
 {
+	//valido las opciones de help y version
+	printf("caca\n");
+	programName = argv[0];
+	printf("caca2\n");
+	if(argc == 2 && (argv[1] == "-h" || argv[1] == "--help")){
+		printHelpMenu();
+		return 0;
+	}else if(argc == 2 && (argv[1] == "-V" || argv[1] == "--version")){
+		printProgramVersion();
+		return 0;
+	}
+
 	int i,M,N;
-	char* filename;
-	FILE* fp_inputfile;
-	int* matrix;
+	char* p;
+	char* s;
+	char* t;
+	errno = 0;
+
+	i = strtol(argv[1], &p, 10);
+	M = strtol(argv[2], &s, 10);
+	N = strtol(argv[3], &t, 10);
+
+	//valido que lo que me hayan pasado en los parametros de dimensiones sean numeros
+	if(*p == '\0' && *s == '\0' && *t == '\0' && errno == 0){
+		//si todo esta bien valido las dimensiones y el archivo de entrada
+		if(argc > 4 && i > 0 && M > 0 && N > 0 && strcmp(argv[4], "") != 0){
+			char* filename = argv[4];
+			FILE* fp_inputfile;
+			int* matrix;
 
 	//harcoded rows(M) and columns(N) for testing purposes
-	M = 5;
-	N = 5;
-	i = 4;
+			// M = 5;
+			// N = 5;
+			// i = 4;
 	//filename = argv[1];
-	fp_inputfile = fopen(argv[1],"r");
-	matrix = createMatrix(M,N);
-	loadMatrix(matrix,M,N,fp_inputfile);
-	fclose(fp_inputfile);
-	printStates(&matrix,i,M,N);
-	eliminateMatrix(matrix);
+			fp_inputfile = fopen(filename,"r");
+			matrix = createMatrix(M,N);
+			loadMatrix(matrix,M,N,fp_inputfile);
+			fclose(fp_inputfile);
+			printStates(&matrix,i,M,N);
+			eliminateMatrix(matrix);
+		}
+	}
+
+	
 	
 	return 0;
 }
