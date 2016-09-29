@@ -28,32 +28,58 @@ vecinos:
 #computar maximos y minimos
 	#max i -> desde: i_origen
 	move 	a0, zero 
+	beq		a1, zero, maxi0
 	subu 	a1, a1, 1 #otra funcion?
-	jal 	max
-	sw		v0, 28(sp)
+	#jal 	max
+	#sw		v0, 28(sp)
+	bgt		a0, a1, maxi0
+	sw		a1, 28(sp)
+	b       salmaxi
+maxi0:
+	sw		a0, 28(sp)
+salmaxi:
 
 	#min i-> hasta: i_final
 	lw		a0, 76(sp)
 	subu 	a0, a0, 1
 	lw		a1, 68(sp)
 	addu 	a1, a1, 1
-	jal		minimo
-	sw		v0, 32(sp)
+	#jal		min
+	#sw		v0, 32(sp)
+	blt		a0, a1, mini0
+	sw		a1, 32(sp)
+	b       salmini
+mini0:
+	sw		a0, 32(sp)
+salmini:
 
 	#max j-> desde: j_origen
 	move	a0, zero
 	lw		a1, 72(sp)
+	beq		zero, a1, maxj0
 	subu 	a1, a1, 1
-	jal		max
-	sw		v0, 36(sp)
+	#jal		max
+	#sw		v0, 36(sp)
+	bgt		a0, a1, maxj0
+	sw 	a1, 36(sp)
+	b       salmaxj
+maxj0:
+	sw	a0, 36(sp)
+salmaxj:
 
 	#min j-> hasta: j_final
 	lw		a0, 80(sp)
 	subu 	a0, a0, 1
 	lw		a1, 72(sp)
 	addu 	a1, a1, 1
-	jal		minimo
-	sw		v0, 40(sp)
+	#jal		min
+	#sw		v0, 40(sp)
+	blt		a0, a1, minj0
+	sw		a1, 40(sp)
+	b       salminj
+minj0:
+	sw 		a0, 40(sp)
+salminj:
 
 #computar vecinos
 #usar los s0-s7???
@@ -63,7 +89,7 @@ vecinos:
 	lw		t3, 36(sp)#j
 	lw		t4, 36(sp)#j_origen
 	lw		t5, 40(sp)#j_final
-	lw		a0, 64(sp)#matrix 
+	la		a0, 64(sp)#matrix 
 	lw		a1, 68(sp) #row
 	lw		a2, 72(sp)#column
 	lw		a3, 80(sp)#columns
@@ -78,13 +104,13 @@ loop2:
 	bne		t3, a2, sum
 	b 		mus
 sum: #esto no va a funcionar
-	#mul	t8, a1, a3 #columns * row
-	#addu 	t8, t8, a2 # + column
-	#mul 	t8, t8, 4 # * 4 por el tamaño de palabra en memoria
-	#addu 	t8, a0, t8 #esta suma no va a funcionar -> dirección que queremos leer
-	#lw 		t9, (t8) #esto menos -> cargamos lo que queremos leer
-	#addu 	t0, t0, t9 #lo sumamos al total parcial
-	addu	t0, t0, 1
+	mul		t8, a1, a3 #columns * row
+	addu 	t8, t8, a2 # + column
+	mul 	t8, t8, 4 # * 4 por el tamaño de palabra en memoria
+	addu 	t8, a0, t8 #esta suma no va a funcionar -> dirección que queremos leer
+	lw 		t9, 0(t8) #esto menos -> cargamos lo que queremos leer
+	addu 	t0, t0, t9 #lo sumamos al total parcial
+	#addu	t0, t0, 1
 
 mus:
 	addu	t3, t3, 1
@@ -136,8 +162,8 @@ fin:
 	.end max
 
 #function min(a,b)
-	.ent minimo
-minimo:
+	.ent min
+min:
 	.frame	$fp, 16, ra
 	.set	noreorder
 	.cpload	t9
@@ -163,4 +189,4 @@ nim:
 	addu	sp, sp, 16
 	j 		ra
 
-	.end minimo
+	.end min 

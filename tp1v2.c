@@ -62,13 +62,31 @@ void printMatrix(int* matrix, int rows, int columns){
 	}
 }
 
+//falta agarrar errores
+void printPBM(char* filename, int* matrix, int rows, int columns) {
+	int i,j;
+	FILE * fp_outputfile = fopen(filename,"w");
+	/* pbm header */
+    fprintf(fp_outputfile, "P4\n%d %d\n", columns, rows);
+    for (i = 0; i < rows; ++i)
+    {
+    	for (j = 0; j < columns; ++j)
+    	{
+    	    fprintf(fp_outputfile, "%d ", matrix[matrixIndex(i,j,columns)]);
+    	}
+    	fprintf(fp_outputfile, "\n");
+    }
+    fclose(fp_outputfile);
+}
+
 int* nextStateMatrix(int* newMatrix, int* originalMatrix, int rows, int columns) {
 	int i,j,totalNeighbours;
 	for (i = 0; i < rows; ++i)
 	{
 		for (j = 0; j < columns; ++j)
 		{
-			totalNeighbours = neighbours(originalMatrix,i,j,rows,columns);
+			totalNeighbours = vecinos(originalMatrix,i,j,rows,columns);
+		//	totalNeighbours = neighbours(originalMatrix,i,j,rows,columns);
 			switch(totalNeighbours) {
 				case 2: {
 					if(originalMatrix[matrixIndex(i,j,columns)] == 1){
@@ -107,11 +125,14 @@ int neighbours(int* matrix, int row, int column, int rows, int columns){
 	return total;
 }
 
-void printStates(int** matrix, int totalStates, int M, int N){
+void printStates(int** matrix, int totalStates, int M, int N, char* filenameout){
 	int i;
 	int* nextMatrix;
+	char filename[20];
+
+	sprintf(filename,"%s_1.pbm",filenameout);
 	printf("Estado inicial:\n");
-	printMatrix(*matrix,M,N);
+	printPBM(filename,*matrix,M,N);
 	for (i = 1; i < totalStates; ++i)
 	{
 		nextMatrix = createMatrix(M,N);
@@ -119,7 +140,8 @@ void printStates(int** matrix, int totalStates, int M, int N){
 		eliminateMatrix(*matrix);
 		*matrix = nextMatrix;
 		printf("Siguiente estado:\n");
-		printMatrix(*matrix,M,N);
+		sprintf(filename, "%s_%d.pbm",filenameout,i);
+		printPBM(filename,*matrix,M,N);
 	}
 	
 }
@@ -137,13 +159,11 @@ void printProgramVersion(){
 int main(int argc, char const *argv[])
 {
 	//valido las opciones de help y version
-	printf("caca\n");
 	programName = argv[0];
-	printf("caca2\n");
-	if(argc == 2 && (argv[1] == "-h" || argv[1] == "--help")){
+	if(argc == 2 && (strcmp(argv[1],"-h") || strcmp(argv[1],"--help"))) {
 		printHelpMenu();
 		return 0;
-	}else if(argc == 2 && (argv[1] == "-V" || argv[1] == "--version")){
+	}else if(argc == 2 && (strcmp(argv[1],"-V") || strcmp(argv[1],"--version"))){
 		printProgramVersion();
 		return 0;
 	}
@@ -152,6 +172,7 @@ int main(int argc, char const *argv[])
 	char* p;
 	char* s;
 	char* t;
+	char* outputfile;
 	errno = 0;
 
 	i = strtol(argv[1], &p, 10);
@@ -175,7 +196,8 @@ int main(int argc, char const *argv[])
 			matrix = createMatrix(M,N);
 			loadMatrix(matrix,M,N,fp_inputfile);
 			fclose(fp_inputfile);
-			printStates(&matrix,i,M,N);
+			outputfile = "salida";
+			printStates(&matrix,i,M,N,outputfile);
 			eliminateMatrix(matrix);
 		}
 	}
