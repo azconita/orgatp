@@ -85,8 +85,8 @@ int* nextStateMatrix(int* newMatrix, int* originalMatrix, int rows, int columns)
 	{
 		for (j = 0; j < columns; ++j)
 		{
-			totalNeighbours = vecinos(originalMatrix,i,j,rows,columns);
-		//	totalNeighbours = neighbours(originalMatrix,i,j,rows,columns);
+		//	totalNeighbours = vecinos(originalMatrix,i,j,rows,columns);
+			totalNeighbours = neighbours(originalMatrix,i,j,rows,columns);
 			switch(totalNeighbours) {
 				case 2: {
 					if(originalMatrix[matrixIndex(i,j,columns)] == 1){
@@ -132,7 +132,8 @@ void printStates(int** matrix, int totalStates, int M, int N, char* filenameout)
 
 	sprintf(filename,"%s_1.pbm",filenameout);
 	printf("Estado inicial:\n");
-	printPBM(filename,*matrix,M,N);
+	//printPBM(filename,*matrix,M,N);
+	printMatrix(*matrix,M,N);
 	for (i = 1; i < totalStates; ++i)
 	{
 		nextMatrix = createMatrix(M,N);
@@ -140,8 +141,9 @@ void printStates(int** matrix, int totalStates, int M, int N, char* filenameout)
 		eliminateMatrix(*matrix);
 		*matrix = nextMatrix;
 		printf("Siguiente estado:\n");
-		sprintf(filename, "%s_%d.pbm",filenameout,i);
+		sprintf(filename, "%s_%d.pbm",filenameout,i+1);
 		printPBM(filename,*matrix,M,N);
+		//printMatrix(*matrix,M,N);
 	}
 	
 }
@@ -175,6 +177,7 @@ int main(int argc, char const *argv[])
 	char* outputfile;
 	errno = 0;
 
+	// FALTA CONSIDERAR CASO EN QUE ARGC ==  1
 	i = strtol(argv[1], &p, 10);
 	M = strtol(argv[2], &s, 10);
 	N = strtol(argv[3], &t, 10);
@@ -196,6 +199,10 @@ int main(int argc, char const *argv[])
 			matrix = createMatrix(M,N);
 			loadMatrix(matrix,M,N,fp_inputfile);
 			fclose(fp_inputfile);
+			//rehacer mejor!
+			if(argc == 7){
+				outputfile = argv[6];
+			} else 
 			outputfile = "salida";
 			printStates(&matrix,i,M,N,outputfile);
 			eliminateMatrix(matrix);

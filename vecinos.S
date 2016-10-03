@@ -3,6 +3,9 @@
 	.text
 	.align	2
 
+	.extern min
+	.extern max
+
 	.globl vecinos
 	.ent vecinos
 vecinos: 
@@ -37,7 +40,7 @@ vecinos:
 	subu 	a0, a0, 1
 	lw		a1, 68(sp)
 	addu 	a1, a1, 1
-	jal		minimo
+	jal		min
 	sw		v0, 32(sp)
 
 	#max j-> desde: j_origen
@@ -52,7 +55,7 @@ vecinos:
 	subu 	a0, a0, 1
 	lw		a1, 72(sp)
 	addu 	a1, a1, 1
-	jal		minimo
+	jal		min
 	sw		v0, 40(sp)
 
 #computar vecinos
@@ -78,7 +81,7 @@ loop2:
 	bne		t3, a2, sum
 	b 		mus
 sum: #esto no va a funcionar
-	#mul	t8, a1, a3 #columns * row
+	#mul		t8, a1, a3 #columns * row
 	#addu 	t8, t8, a2 # + column
 	#mul 	t8, t8, 4 # * 4 por el tamaño de palabra en memoria
 	#addu 	t8, a0, t8 #esta suma no va a funcionar -> dirección que queremos leer
@@ -108,8 +111,8 @@ pool1:
 
 
 #function max(a,b)
-	.ent max
-max:
+	.ent maxim
+maxim:
 	.frame	$fp, 16, ra
 	.set	noreorder
 	.cpload	t9
@@ -133,11 +136,11 @@ fin:
 	lw		$fp, 8(sp)
 	addu	sp, sp, 16
 	j 		ra
-	.end max
+	.end maxim
 
 #function min(a,b)
-	.ent minimo
-minimo:
+	.ent minim
+minim:
 	.frame	$fp, 16, ra
 	.set	noreorder
 	.cpload	t9
@@ -163,4 +166,4 @@ nim:
 	addu	sp, sp, 16
 	j 		ra
 
-	.end minimo
+	.end minim

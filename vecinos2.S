@@ -89,7 +89,7 @@ salminj:
 	lw		t3, 36(sp)#j
 	lw		t4, 36(sp)#j_origen
 	lw		t5, 40(sp)#j_final
-	la		a0, 64(sp)#matrix 
+	lw		a0, 64(sp)#matrix 
 	lw		a1, 68(sp) #row
 	lw		a2, 72(sp)#column
 	lw		a3, 80(sp)#columns
@@ -97,20 +97,22 @@ salminj:
 
 loop1:
 	bgt 	t1, t2, pool1
-	move	t4, t3
+	move	t3, t4
 loop2:
 	bgt		t3, t5, pool2
 	bne		t1, a1, sum
 	bne		t3, a2, sum
 	b 		mus
 sum: #esto no va a funcionar
-	mul		t8, a1, a3 #columns * row
-	addu 	t8, t8, a2 # + column
-	mul 	t8, t8, 4 # * 4 por el tamaño de palabra en memoria
-	addu 	t8, a0, t8 #esta suma no va a funcionar -> dirección que queremos leer
+	mul		t8, t1, a3 #columns * row
+	#mflo	t8
+	addu 	t8, t8, t3 # + column
+	li 		t7, 4
+	mul 	t8, t8, t7 # * 4 por el tamaño de palabra en memoria
+	#mflo	t8
+	addu 	t8, a0, t8 #dirección que queremos leer
 	lw 		t9, 0(t8) #esto menos -> cargamos lo que queremos leer
 	addu 	t0, t0, t9 #lo sumamos al total parcial
-	#addu	t0, t0, 1
 
 mus:
 	addu	t3, t3, 1
@@ -129,64 +131,3 @@ pool1:
 	addu 	sp, sp, 64
 	j 		ra
 	.end	vecinos
-
-
-
-
-#function max(a,b)
-	.ent max
-max:
-	.frame	$fp, 16, ra
-	.set	noreorder
-	.cpload	t9
-	.set	reorder
-	subu	sp, sp, 16
-	.cprestore 0
-	sw		gp, 4(sp)
-	sw		$fp, 8(sp)
-	move	$fp, sp
-	sw		a0, 16(sp)
-	sw 		a1, 20(sp)
-
-	bgt		a0, a1, maxa0
-	move 	v0, a1
-	b       fin
-maxa0:
-	move	v0, a0
-fin:
-	#se devuelve en v0 a o b
-	lw		gp, 4(sp)
-	lw		$fp, 8(sp)
-	addu	sp, sp, 16
-	j 		ra
-	.end max
-
-#function min(a,b)
-	.ent min
-min:
-	.frame	$fp, 16, ra
-	.set	noreorder
-	.cpload	t9
-	.set	reorder
-	subu	sp, sp, 16
-	.cprestore 0
-	sw		gp, 4(sp)
-	sw		$fp, 8(sp)
-	move	$fp, sp
-	sw		a0, 16(sp)
-	sw 		a1, 20(sp)
-
-	#inverso de max
-	blt		a0, a1, mina0
-	move 	v0, a1
-	b       nim
-mina0:
-	move	v0, a0
-nim:
-	#se devuelve en v0 a o b
-	lw		gp, 4(sp)
-	lw		$fp, 8(sp)
-	addu	sp, sp, 16
-	j 		ra
-
-	.end min 

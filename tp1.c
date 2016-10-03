@@ -85,7 +85,8 @@ int** nextStateMatrix(int** newMatrix, int** originalMatrix, int rows, int colum
 					newMatrix[i][j] = 1;
 					break;
 					}
-				
+				//default:
+				//	newMatrix[i][j] = 0;
 			}
 		}
 	}
@@ -122,7 +123,6 @@ void printStates(int** matrix, int totalStates, int M, int N){
 		printf("Siguiente estado:\n");
 		printMatrix(matrix,M,N);
 	}
-
 	
 }
 
