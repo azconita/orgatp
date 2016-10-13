@@ -158,9 +158,17 @@ void printStates(int** matrix, int totalStates, int M, int N, char* filenameout)
 }
 
 void printHelpMenu(){
-	printf("\n\t\t-h, --help\tImprime este mensaje.\n"
-"\t\t-V, --version\tDa la version del programa.\n"
-"\t\t-o\t\tPrefijo de los archivos de salida.\n\n");
+	printf("\n\t\tOpciones:\n"
+		"\t\t -h, --help\tImprime este mensaje.\n"
+		"\t\t -V, --version\tDa la version del programa.\n"
+		"\t\t -o\t\tPrefijo de los archivos de salida.\n\n"
+		"\t\tEjemplo:\n"
+		"\t\t conway 10 20 20 glider -o estado\n\n"
+		"\t\t Representa 10 iteraciones del Juego de la Vida en una matriz de 20x20,\n"
+		"\t\t con un estado inicial tomado del archivo ‘‘glider’’.\n"
+		"\t\t Los archivos de salida se llamaran estado_n.pbm.\n"
+		"\t\t Si no se da un prefijo para los archivos de salida,\n"
+		"\t\t el prefijo sera el nombre del archivo de entrada.\n\n");
 }
 
 void printProgramVersion(){
@@ -200,7 +208,7 @@ void lifeGame(int argc, char const *argv[]){
 			if(argc == 7 && strcmp(argv[5],"-o") == 0 ){
 				outputfile = argv[6];
 			} else {
-				outputfile = "salida";
+				outputfile = argv[0];
 			}
 			printStates(&matrix,i,M,N,outputfile);
 			eliminateMatrix(matrix);
