@@ -42,7 +42,7 @@ void loadMatrix(int* matrix, int rows, int columns, FILE* fp_input) {
 			fclose(fp_input);
 			errno = ERANGE;
 			perror("Error invalid position");
-			fprintf(stderr, "Matrix position %d %d out of range: %s\n", i, j, strerror(errno));
+			fprintf(stderr, "Matrix position %d %d out of range: %s\n", i + 1, j + 1, strerror(errno));
 			exit(-1);
 		}else{
 			matrix[matrixIndex(i,j,columns)] = 1;
@@ -198,7 +198,7 @@ void lifeGame(int argc, char const *argv[]){
 			fp_inputfile = fopen(filename,"r");
 			if(fp_inputfile == NULL){
 				perror("Error opening file");
-				fprintf(stderr, "The file does not exist: %s\n", strerror(errno));
+				fprintf(stderr, "The file %s does not exist: %s\n", filename, strerror(errno));
 				exit(-1);
 			}
 			matrix = createMatrix(M,N);
