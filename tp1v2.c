@@ -1,8 +1,5 @@
 /*
 Queda por hacer:
-	el menu de opciones
-	que se escriban en archivos
-	que se lean variables por argv[]
 	errores y stderr
 	funcion en assembler
 
@@ -10,6 +7,7 @@ Queda por hacer:
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -17,7 +15,7 @@ Queda por hacer:
 const char *programVersion = "2.1";
 char *programName;
 
-extern int vecinos(int* matrix, int row, int column, int rows, int columns);
+//extern int vecinos(int* matrix, int row, int column, int rows, int columns);
 
 void eliminateMatrix(int* matrix) { 
 	free(matrix);
@@ -40,8 +38,15 @@ void loadMatrix(int* matrix, int rows, int columns, FILE* fp_input) {
 	while(fgets(buff, 10, fp_input) != NULL){
 		i = atoi(&buff[0]) - 1;
 		j = atoi(&buff[2]) - 1;
-		//falta considerar el columns - 1 y rows - 1 (podria hacerse al comienzo del programa y listo)
-		matrix[matrixIndex(i,j,columns)] = 1;
+		if( (i > (rows - 1) || i < 0 ) || (j > (columns - 1) || j < 0) ){
+			fclose(fp_input);
+			errno = ERANGE;
+			perror("Error invalid position");
+			fprintf(stderr, "Matrix position %d %d out of range: %s\n", i, j, strerror(errno));
+			exit(-1);
+		}else{
+			matrix[matrixIndex(i,j,columns)] = 1;
+		}
 	}
 }
 
@@ -67,6 +72,10 @@ void printPBM(char* filename, int* matrix, int rows, int columns) {
 	int i,j;
 	FILE * fp_outputfile = fopen(filename,"w");
 	/* pbm header */
+	if(fp_outputfile == NULL){
+	    fprintf(stderr, "Error opening output file: %s\n", strerror( errno ));
+	    exit(-1);
+	}
     fprintf(fp_outputfile, "P4\n%d %d\n", columns, rows);
     for (i = 0; i < rows; ++i)
     {
@@ -132,7 +141,7 @@ void printStates(int** matrix, int totalStates, int M, int N, char* filenameout)
 
 	sprintf(filename,"%s_1.pbm",filenameout);
 	printf("Estado inicial:\n");
-	//printPBM(filename,*matrix,M,N);
+	printPBM(filename,*matrix,M,N);
 	printMatrix(*matrix,M,N);
 	for (i = 1; i < totalStates; ++i)
 	{
@@ -143,33 +152,22 @@ void printStates(int** matrix, int totalStates, int M, int N, char* filenameout)
 		printf("Siguiente estado:\n");
 		sprintf(filename, "%s_%d.pbm",filenameout,i+1);
 		printPBM(filename,*matrix,M,N);
-		//printMatrix(*matrix,M,N);
+		printMatrix(*matrix,M,N);
 	}
 	
 }
 
 void printHelpMenu(){
-	printf("\n\n\t\t-h, --help Imprime este mensaje.\n"
-"\t\t-V, --version Da la versi´on del programa.\n"
-"\t\t-o Prefijo de los archivos de salida.\n\n");
+	printf("\n\t\t-h, --help\tImprime este mensaje.\n"
+"\t\t-V, --version\tDa la version del programa.\n"
+"\t\t-o\t\tPrefijo de los archivos de salida.\n\n");
 }
 
 void printProgramVersion(){
-	printf("\n%s Version %s\n", programName, programVersion);
+	printf("%s Version %s\n", programName, programVersion);
 }
 
-int main(int argc, char const *argv[])
-{
-	//valido las opciones de help y version
-	programName = argv[0];
-	if(argc == 2 && (strcmp(argv[1],"-h") || strcmp(argv[1],"--help"))) {
-		printHelpMenu();
-		return 0;
-	}else if(argc == 2 && (strcmp(argv[1],"-V") || strcmp(argv[1],"--version"))){
-		printProgramVersion();
-		return 0;
-	}
-
+void lifeGame(int argc, char const *argv[]){
 	int i,M,N;
 	char* p;
 	char* s;
@@ -177,7 +175,6 @@ int main(int argc, char const *argv[])
 	char* outputfile;
 	errno = 0;
 
-	// FALTA CONSIDERAR CASO EN QUE ARGC ==  1
 	i = strtol(argv[1], &p, 10);
 	M = strtol(argv[2], &s, 10);
 	N = strtol(argv[3], &t, 10);
@@ -190,26 +187,53 @@ int main(int argc, char const *argv[])
 			FILE* fp_inputfile;
 			int* matrix;
 
-	//harcoded rows(M) and columns(N) for testing purposes
-			// M = 5;
-			// N = 5;
-			// i = 4;
-	//filename = argv[1];
 			fp_inputfile = fopen(filename,"r");
+			if(fp_inputfile == NULL){
+				perror("Error opening file");
+				fprintf(stderr, "The file does not exist: %s\n", strerror(errno));
+				exit(-1);
+			}
 			matrix = createMatrix(M,N);
 			loadMatrix(matrix,M,N,fp_inputfile);
 			fclose(fp_inputfile);
-			//rehacer mejor!
-			if(argc == 7){
+
+			if(argc == 7 && strcmp(argv[5],"-o") == 0 ){
 				outputfile = argv[6];
-			} else 
-			outputfile = "salida";
+			} else {
+				outputfile = "salida";
+			}
 			printStates(&matrix,i,M,N,outputfile);
 			eliminateMatrix(matrix);
 		}
+	}else{
+		errno = ERANGE;
+		perror("Error invalid parameter type");
+		fprintf(stderr, "Parameters must be numbers: %s\n", strerror(errno));
+		exit(-1);
 	}
+}
 
+int main(int argc, char const *argv[])
+{
+	//valido las opciones de help y version
+	programName = argv[0];
 	
-	
+	if(argc == 2 && (strcmp(argv[1],"-h") == 0 || strcmp(argv[1],"--help") == 0)) {
+		printHelpMenu();
+		exit(0);
+	}else{
+		if(argc == 2 && (strcmp(argv[1],"-V") == 0 || strcmp(argv[1],"--version")  == 0)){
+			printProgramVersion();
+			exit(0);
+		}else{
+			if(argc > 4){
+		    	lifeGame(argc, argv);
+			}else{
+				fprintf(stderr, "Parametros invalidos. Ejecute el comando -h/--help para obtener ayuda\n");
+				exit(-1);
+			}
+		}
+	} 
+		
 	return 0;
 }
